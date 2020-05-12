@@ -44,8 +44,8 @@ driver.find_element_by_css_selector("#RadDock_formularze_C_RadButton_szukaj_zaaw
 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#RadComboBox_rok_zal_od_Input")))
 driver.find_element_by_css_selector("#RadComboBox_rok_zal_od_Input").clear()
 driver.find_element_by_css_selector("#RadComboBox_rok_zal_od_Input").send_keys(str(YEAR))
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#RadComboBox_rok_zal_od_Input")))
-driver.find_element_by_css_selector("#RadComboBox_rok_zal_od_Input").clear()
+wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#RadComboBox_rok_zal_do_Input")))
+driver.find_element_by_css_selector("#RadComboBox_rok_zal_do_Input").clear()
 driver.find_element_by_css_selector("#RadComboBox_rok_zal_do_Input").send_keys(str(YEAR))
 
 # %%
