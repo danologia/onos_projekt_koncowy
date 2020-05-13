@@ -21,7 +21,7 @@ def read_years(years_with_paths):
 
 
 def read_raw_data():
-    available_years = os.listdir(RAW_DATA_DIR)
+    available_years = [d for d in os.listdir(RAW_DATA_DIR) if os.path.isdir(os.path.join(RAW_DATA_DIR, d))]
     years_paths = [os.path.join(RAW_DATA_DIR, yr) for yr in available_years]
     years_with_paths = zip(available_years, years_paths)
     years_data = read_years(years_with_paths)
