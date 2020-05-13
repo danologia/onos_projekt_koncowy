@@ -123,7 +123,7 @@ if __name__ == '__main__':
     login = os.environ['LOGIN']
     password = os.environ['PASSWORD']
     nodes = pd.read_csv(NODES_DIR, dtype=object)
-    authors_data = list(zip(nodes['id'].to_list(), nodes['label'].to_list()))[:3]
+    authors_data = list(zip(nodes['id'].to_list(), nodes['label'].to_list()))
     all_entries = scrape_authors_data(login, password, authors_data)
     with open(AUTHORS_DIR, 'w') as fp:
         json.dump(all_entries, fp, indent=1, ensure_ascii=False)
