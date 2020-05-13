@@ -21,7 +21,6 @@ def scrape_authors_data(login, password, authors):
     options.headless = True
     driver = webdriver.Firefox("./", options=options)
     pbar = tqdm(authors)
-    all_entries = []
     driver.get('https://dona.pwr.edu.pl/szukaj/')
     wait = WebDriverWait(driver, 20)
     wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "#RadButton_login")))
@@ -115,8 +114,8 @@ def scrape_authors_data(login, password, authors):
             'impact_factor': impact_factor,
             'supervisorships': supervisorships
         }
-        all_entries.append(entry)
-    return all_entries
+        with open(os.path.join(AUTHORS_DIR, str(id) + ".json"), 'w') as fp:
+            json.dump(entry, fp, indent=1, ensure_ascii=False)
 
 
 if __name__ == '__main__':
@@ -124,6 +123,4 @@ if __name__ == '__main__':
     password = os.environ['PASSWORD']
     nodes = pd.read_csv(NODES_DIR, dtype=object)
     authors_data = list(zip(nodes['id'].to_list(), nodes['label'].to_list()))
-    all_entries = scrape_authors_data(login, password, authors_data)
-    with open(AUTHORS_DIR, 'w') as fp:
-        json.dump(all_entries, fp, indent=1, ensure_ascii=False)
+    scrape_authors_data(login, password, authors_data)
