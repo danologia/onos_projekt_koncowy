@@ -1,4 +1,4 @@
-from src.settings import RAW_DATA_DIR, DEFAULT_NODES_DIR, DEFAULT_EDGES_DIR, get_nodes_and_edges_dir
+from src.settings import RAW_DATA_DIR, DEFAULT_NODES_DIR, DEFAULT_EDGES_DIR, get_nodes_and_edges_dir, PROCESSED_DATA_DIR
 import os
 import json
 from itertools import combinations
@@ -99,20 +99,57 @@ def plot_authors_and_collaborations_numbers_by_years():
     plt.show()
 
 
-if __name__ == '__main__':
-    plot_authors_and_collaborations_numbers_by_years()
-    # starting_years = range(2000, 2021, 1)
-    # data = read_raw_data()
-    # for year in starting_years:
-    #     nodes, edges = parse_graph(data, year)
-    #     save_graph_data(nodes, edges, year)
+def add_data_to_nodes(nodes_file_path):
+    nodes = pd.read_csv(nodes_file_path, dtype=object)
+    authors = []
+    ids = nodes['id'].to_list()
+    for id in ids:
+        with open(os.path.join(RAW_DATA_DIR, 'authors', str(id) + '.json'), 'r') as f:
+            auth = json.load(f)
+            authors.append(auth)
+    df = pd.DataFrame(authors)
+    df2 = pd.merge(nodes, df, on='id').drop('name', axis=1)
+    df2 = df2.replace({
+        'disciplines': {
+            'Nieznane': '[]'
+        },
+        'publications': {
+            'Nieznane': 0
+        },
+        'citations': {
+            'Nieznane': 0
+        },
+        'impact_factor': {
+            'Nieznane': 0
+        },
+        'supervisorships': {
+            'Nieznane': 0
+        },
+    })
 
-    starting_year = None
-    if len(sys.argv) > 0:
-        try:
-            starting_year = int(sys.argv[0])
-        except ValueError:
-            pass
-    data = read_raw_data()
-    nodes, edges = parse_graph(data)
-    save_graph_data(nodes, edges)
+    new_path = "_with_authors.".join(nodes_file_path.rsplit('.', maxsplit=1))
+    df2.to_csv(new_path, index=False)
+    print(df2.head())
+
+if __name__ == '__main__':
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.width', None)
+    pd.set_option('display.max_colwidth', -1)
+    add_data_to_nodes(os.path.join(PROCESSED_DATA_DIR, "nodes_2015.csv"))
+    # plot_authors_and_collaborations_numbers_by_years()
+    # # starting_years = range(2000, 2021, 1)
+    # # data = read_raw_data()
+    # # for year in starting_years:
+    # #     nodes, edges = parse_graph(data, year)
+    # #     save_graph_data(nodes, edges, year)
+    #
+    # starting_year = None
+    # if len(sys.argv) > 0:
+    #     try:
+    #         starting_year = int(sys.argv[0])
+    #     except ValueError:
+    #         pass
+    # data = read_raw_data()
+    # nodes, edges = parse_graph(data)
+    # save_graph_data(nodes, edges)

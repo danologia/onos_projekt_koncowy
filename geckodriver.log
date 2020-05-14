@@ -136,3 +136,8 @@ A content process crashed and MOZ_CRASHREPORTER_SHUTDOWN is set, shutting down
 1589465996757	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 1589465997518	Marionette	INFO	Listening on port 43243
 1589465997603	Marionette	WARN	TLS certificate errors will be ignored for this session
+1589474909855	Marionette	INFO	Stopped listening on port 35435
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+1589474909873	Marionette	INFO	Stopped listening on port 43243
