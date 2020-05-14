@@ -1,8 +1,8 @@
 import pandas as pd
-from src.settings import NODES_DIR
+from src.settings import DEFAULT_NODES_DIR
 import numpy as np
 
-nodes = pd.read_csv(NODES_DIR, dtype=object)
+nodes = pd.read_csv(DEFAULT_NODES_DIR, dtype=object)
 names = nodes['label'].to_numpy(dtype=object)
 ids = nodes['id'].to_numpy(dtype=np.int)
 unique_names, unique_counts = np.unique(names, return_counts=True)

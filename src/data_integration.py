@@ -1,9 +1,10 @@
-from src.settings import RAW_DATA_DIR, NODES_DIR, EDGES_DIR
+from src.settings import RAW_DATA_DIR, DEFAULT_NODES_DIR, DEFAULT_EDGES_DIR, get_nodes_and_edges_dir
 import os
 import json
 from itertools import combinations
 import pandas as pd
 import sys
+import matplotlib.pyplot as plt
 
 
 def read_years(years_with_paths):
@@ -21,7 +22,8 @@ def read_years(years_with_paths):
 
 
 def read_raw_data():
-    available_years = [d for d in os.listdir(RAW_DATA_DIR) if os.path.isdir(os.path.join(RAW_DATA_DIR, d))]
+    available_years = [d for d in os.listdir(RAW_DATA_DIR) if os.path.isdir(os.path.join(RAW_DATA_DIR, d))
+                       and d != 'authors']
     years_paths = [os.path.join(RAW_DATA_DIR, yr) for yr in available_years]
     years_with_paths = zip(available_years, years_paths)
     years_data = read_years(years_with_paths)
@@ -58,14 +60,53 @@ def parse_graph(data, starting_year=None):
     return nodes_flat, edges_flat
 
 
-def save_graph_data(nodes, edges):
+def save_graph_data(nodes, edges, starting_year=None):
+    if starting_year is not None:
+        nodes_dir, edges_dir = get_nodes_and_edges_dir(starting_year)
+    else:
+        nodes_dir, edges_dir = DEFAULT_NODES_DIR, DEFAULT_EDGES_DIR
     nodes_pd = pd.DataFrame(nodes, columns=['id', 'label'])
-    nodes_pd.to_csv(NODES_DIR, index=False)
+    nodes_pd.to_csv(nodes_dir, index=False)
     edges_pd = pd.DataFrame(edges, columns=['source', 'target', 'weight'])
-    edges_pd.to_csv(EDGES_DIR, index=False)
+    edges_pd.to_csv(edges_dir, index=False)
+
+
+def plot_authors_and_collaborations_numbers_by_years():
+    starting_years = range(2000, 2021, 1)
+    authors_counts = []
+    collaborations_counts = []
+    for year in starting_years:
+        nodes_dir, edges_dir = get_nodes_and_edges_dir(year)
+        with open(nodes_dir) as f:
+            for i, _ in enumerate(f):
+                pass
+        authors_counts.append(i - 1)
+        with open(edges_dir) as f:
+            for i, _ in enumerate(f):
+                pass
+        collaborations_counts.append(i - 1)
+    plt.scatter(starting_years, authors_counts)
+    plt.xticks(starting_years, rotation=45)
+    plt.xlabel("Początkowy rok")
+    plt.ylabel("Liczba autorów")
+    plt.title("Liczba unikalnych autorów w bazie")
+    plt.show()
+    plt.scatter(starting_years, collaborations_counts)
+    plt.xticks(starting_years, rotation=45)
+    plt.xlabel("Początkowy rok")
+    plt.title("Liczba unikalnych kolaboracji w bazie")
+    plt.ylabel("Liczba kolaboracji")
+    plt.show()
 
 
 if __name__ == '__main__':
+    plot_authors_and_collaborations_numbers_by_years()
+    # starting_years = range(2000, 2021, 1)
+    # data = read_raw_data()
+    # for year in starting_years:
+    #     nodes, edges = parse_graph(data, year)
+    #     save_graph_data(nodes, edges, year)
+
     starting_year = None
     if len(sys.argv) > 0:
         try:
@@ -73,5 +114,5 @@ if __name__ == '__main__':
         except ValueError:
             pass
     data = read_raw_data()
-    nodes, edges = parse_graph(data, starting_year)
+    nodes, edges = parse_graph(data)
     save_graph_data(nodes, edges)

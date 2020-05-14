@@ -12,7 +12,7 @@ import sys
 import os
 import time
 import re
-from src.settings import NODES_DIR, AUTHORS_DIR
+from src.settings import DEFAULT_NODES_DIR, AUTHORS_DIR
 import multiprocessing
 import logging
 from selenium.webdriver.remote.remote_connection import LOGGER as seleniumLogger
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     urllibLogger.setLevel(logging.WARNING)
     login = os.environ['LOGIN']
     password = os.environ['PASSWORD']
-    nodes = pd.read_csv(NODES_DIR, dtype=object)
+    nodes = pd.read_csv(DEFAULT_NODES_DIR, dtype=object)
     authors_data = list(zip(nodes['id'].to_list(), nodes['label'].to_list()))
     already_downloaded = [name.split('.')[0] for name in os.listdir(AUTHORS_DIR)]
     print(f"Skipping {len(already_downloaded)} already downloaded authors")
