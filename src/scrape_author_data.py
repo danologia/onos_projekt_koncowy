@@ -126,11 +126,11 @@ def scrape_authors_data(login, password, authors):
                 'name': name,
                 'department': UNKNOWN,
                 'orcid': UNKNOWN,
-                'disciplines': UNKNOWN,
-                'publications': UNKNOWN,
-                'citations': UNKNOWN,
-                'impact_factor': UNKNOWN,
-                'supervisorships': UNKNOWN
+                'disciplines': [],
+                'publications': 0,
+                'citations': 0,
+                'impact_factor': 0,
+                'supervisorships': 0
             }
         with open(os.path.join(AUTHORS_DIR, str(id) + ".json"), 'w') as fp:
             json.dump(entry, fp, indent=1, ensure_ascii=False)
