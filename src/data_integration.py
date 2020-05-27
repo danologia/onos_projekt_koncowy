@@ -1,7 +1,7 @@
 from src.settings import RAW_DATA_DIR, DEFAULT_NODES_DIR, DEFAULT_EDGES_DIR, get_nodes_and_edges_dir, PROCESSED_DATA_DIR
 import os
 import json
-from itertools import combinations
+from itertools import combinations, product
 import pandas as pd
 import sys
 import matplotlib.pyplot as plt
@@ -131,12 +131,84 @@ def add_data_to_nodes(nodes_file_path):
     df2.to_csv(new_path, index=False)
     print(df2.head())
 
+
+def read_departments_data(nodes_file_path):
+    nodes = pd.read_csv(nodes_file_path, dtype=object)
+    authors_mapping = dict(zip(nodes['id'], nodes['department']))
+    unique_departments = list(set(authors_mapping.values()))
+    return authors_mapping, unique_departments
+
+
+def flatten_edges_file_by_deps_collaborations(department_mapping, unique_departments, edges_file_path):
+    def merge(dict, pair, weight):
+        dict[pair] += int(weight)
+    return flatten_edges_file_by_departments(department_mapping, unique_departments, edges_file_path,
+                                             lambda dict, pair, weight: merge(dict, pair, weight))
+
+
+def flatten_edges_file_by_deps_number(department_mapping, unique_departments, edges_file_path):
+    def merge(dict, pair, _):
+        dict[pair] += 1
+    return flatten_edges_file_by_departments(department_mapping, unique_departments, edges_file_path,
+                                             lambda dict, pair, weight: merge(dict, pair, weight))
+
+
+def flatten_edges_file_by_departments(department_mapping, unique_departments, edges_file_path, merging_fun):
+    edges = pd.read_csv(edges_file_path, dtype=object)
+
+    unique_departments.remove('Nieznane')
+    department_pairs = product(unique_departments, repeat=2)
+    sorted_pairs = sorted([tuple(sorted(pair)) for pair in department_pairs])
+
+    result_nodes = pd.DataFrame({
+        'id': unique_departments,
+        'label': unique_departments
+    })
+
+    result_edges = {
+        pair: 0
+        for pair in sorted_pairs
+    }
+
+    for _, (source, target, weight) in edges.iterrows():
+        source_dep = department_mapping[source]
+        target_dep = department_mapping[target]
+        if source_dep != 'Nieznane' and target_dep != 'Nieznane':
+            pair = tuple(sorted((source_dep, target_dep)))
+            merging_fun(result_edges, pair, weight)
+
+    sources, targets = zip(*result_edges.keys())
+    sources = list(sources)
+    targets = list(targets)
+    values = list(result_edges.values())
+    result_edges = pd.DataFrame({
+        'source': sources,
+        'target': targets,
+        'weight': values
+    })
+    return result_nodes, result_edges
+
+
+def flatten_by_departments(type, year):
+    if type == 'works':
+        fn = flatten_edges_file_by_deps_number
+    elif type == 'colabs':
+        fn = flatten_edges_file_by_deps_collaborations
+
+    mapping, departments = read_departments_data(os.path.join(PROCESSED_DATA_DIR, f"nodes_{year}_with_authors.csv"))
+    nodes, edges = fn(mapping, departments,
+                                                         os.path.join(PROCESSED_DATA_DIR, f"edges_{year}.csv"))
+    nodes.to_csv(os.path.join(PROCESSED_DATA_DIR, f"nodes_{year}_deps_{type}.csv"), index=False)
+    edges.to_csv(os.path.join(PROCESSED_DATA_DIR, f"edges_{year}_deps_{type}.csv"), index=False)
+
+
 if __name__ == '__main__':
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
     pd.set_option('display.width', None)
     pd.set_option('display.max_colwidth', -1)
-    add_data_to_nodes(os.path.join(PROCESSED_DATA_DIR, "nodes_2015.csv"))
+    flatten_by_departments('works', 2015)
+    # add_data_to_nodes(os.path.join(PROCESSED_DATA_DIR, "nodes_2015.csv"))
     # plot_authors_and_collaborations_numbers_by_years()
     # # starting_years = range(2000, 2021, 1)
     # # data = read_raw_data()
