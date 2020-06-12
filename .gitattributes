@@ -1,1 +1,4 @@
 data/** filter=lfs diff=lfs merge=lfs -text
+website/data/data.json filter=lfs diff=lfs merge=lfs -text
+website/data/graph.gexf filter=lfs diff=lfs merge=lfs -text
+website/data/graph.json filter=lfs diff=lfs merge=lfs -text
